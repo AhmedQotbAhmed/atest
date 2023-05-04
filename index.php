@@ -1,12 +1,14 @@
 <?php
 session_start();
+$noNavbar='';
+$pageTitle = 'Login';
+
 if(isset($_SESSION['Username'])){
     
     header('Location: dashbord.php'); //redirect to dashbord
 }
-$noNavbar='';
 include 'init.php';
-include $lang. 'english.php';
+include_once $langs. 'english.php';
 include $tpl.'header.php';
 
 if( $_SERVER['REQUEST_METHOD']=='POST'&& !empty($_POST) ){
@@ -15,13 +17,20 @@ if( $_SERVER['REQUEST_METHOD']=='POST'&& !empty($_POST) ){
     $hashedPass=sha1($password);
 
     // check if the user exist in db 
-    $stmt= $con->prepare("SELECT Username, Password FROM users Where Username=? AND Password=? AND GroupID=1");
+    $stmt= $con->prepare("SELECT Username, Password 
+    FROM users 
+    Where Username=? 
+    AND Password=? 
+    AND GroupID=1
+    LIMIT 1");
     $stmt->execute(array($user,$hashedPass));
+    $row= $stmt->fetch();
     $count= $stmt->rowCount();
     //LOGIN
     if($stmt->rowCount()>0){
         $_SESSION ['Username']= $user; // Regiser session name
-        header('Location: dashbord.php'); //redirect to dashbord
+        $_SESSION ['userId']= $row['UserId']; // Regiser session ID
+        header('Location: dashboard.php'); //redirect to dashbord
         exit();
     }
 }
